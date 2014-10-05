@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 public class MundoJuego {
 	private JPanel panel;  // panel visual del juego
 	CocheJuego miCoche;    // Coche del juego
-	
+
 	/** Construye un mundo de juego
 	 * @param panel	Panel visual del juego
 	 */
@@ -30,7 +30,7 @@ public class MundoJuego {
 		panel.add( miCoche.getGrafico() );  // Añade al panel visual
 		miCoche.getGrafico().repaint();  // Refresca el dibujado del coche
 	}
-	
+
 	/** Devuelve el coche del mundo
 	 * @return	Coche en el mundo. Si no lo hay, devuelve null
 	 */
@@ -46,7 +46,7 @@ public class MundoJuego {
 		return (coche.getPosX() < JLabelCoche.RADIO_ESFERA_COCHE-JLabelCoche.TAMANYO_COCHE/2 
 				|| coche.getPosX()>panel.getWidth()-JLabelCoche.TAMANYO_COCHE/2-JLabelCoche.RADIO_ESFERA_COCHE );
 	}
-	
+
 	/** Calcula si hay choque en vertical con los límites del mundo
 	 * @param coche	Coche cuyo choque se comprueba con su posición actual
 	 * @return	true si hay choque vertical, false si no lo hay
@@ -66,7 +66,7 @@ public class MundoJuego {
 		if (dir < 0) dir = 360+dir;  // Corrección para mantenerlo en [0,360)
 		coche.setDireccionActual( dir );
 	}
-	
+
 	/** Realiza un rebote en vertical del objeto de juego indicado
 	 * @param coche	Objeto que rebota en vertical
 	 */
@@ -76,7 +76,7 @@ public class MundoJuego {
 		dir = 360 - dir;  // Rebote espejo sobre OX (complementario de 360)
 		miCoche.setDireccionActual( dir );
 	}
-	
+
 	/** Calcula y devuelve la posición X de un movimiento
 	 * @param vel    	Velocidad del movimiento (en píxels por segundo)
 	 * @param dir    	Dirección del movimiento en grados (0º = eje OX positivo. Sentido antihorario)
@@ -86,7 +86,7 @@ public class MundoJuego {
 	public static double calcMovtoX( double vel, double dir, double tiempo ) {
 		return vel * Math.cos(dir/180.0*Math.PI) * tiempo;
 	}
-	
+
 	/** Calcula y devuelve la posición X de un movimiento
 	 * @param vel    	Velocidad del movimiento (en píxels por segundo)
 	 * @param dir    	Dirección del movimiento en grados (0º = eje OX positivo. Sentido antihorario)
@@ -97,7 +97,7 @@ public class MundoJuego {
 		return vel * -Math.sin(dir/180.0*Math.PI) * tiempo;
 		// el negativo es porque en pantalla la Y crece hacia abajo y no hacia arriba
 	}
-	
+
 	/** Calcula el cambio de velocidad en función de la aceleración
 	 * @param vel		Velocidad original
 	 * @param acel		Aceleración aplicada (puede ser negativa) en pixels/sg2
@@ -107,5 +107,33 @@ public class MundoJuego {
 	public static double calcVelocidadConAceleracion( double vel, double acel, double tiempo ) {
 		return vel + (acel*tiempo);
 	}
-	
+
+	public static double calcFuerzaRozamiento( double masa, double coefRozSuelo, 
+			double coefRozAire, double vel ) { 
+		double fuerzaRozamientoAire = coefRozAire * (-vel); // En contra del movimiento 
+		double fuerzaRozamientoSuelo = masa * coefRozSuelo * ((vel>0)?(-1):1); // Contra mvto 
+		return fuerzaRozamientoAire + fuerzaRozamientoSuelo; 
+	} 
+
+	public static double calcAceleracionConFuerza( double fuerza, double masa ) { 
+		// 2ª ley de Newton: F = m*a ---> a = F/m 
+		return fuerza/masa; 
+	} 
+
+	public static void aplicarFuerza( double fuerza, Coche coche ) { 
+		double fuerzaRozamiento = calcFuerzaRozamiento( Coche.MASA , 
+				Coche.ROZAMIENTO_SUELO, Coche.ROZAMIENTO_AIRE, coche.getVelocidad() ); 
+		double aceleracion = calcAceleracionConFuerza( fuerza+fuerzaRozamiento, Coche.MASA ); 
+		if (fuerza==0) { 
+			// No hay fuerza, solo se aplica el rozamiento 
+			double velAntigua = coche.getVelocidad(); 
+			coche.acelera( aceleracion, 0.04 ); 
+			if (velAntigua>=0 && coche.getVelocidad()<0 
+					|| velAntigua<=0 && coche.getVelocidad()>0) { 
+				coche.setVelocidad(0); // Si se está frenando, se para (no anda al revés) 
+			} 
+		} else { 
+			coche.acelera( aceleracion, 0.04 ); 
+		}
+	}
 }

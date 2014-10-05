@@ -179,8 +179,9 @@ public class VentanaJuego extends JFrame {
 				// Mover coche
 				miCoche.mueve( 0.040 );
 //				Chequear teclas pulsadas
-				if(teclas[0]) miCoche.acelera(5, 1);
-				if(teclas[1]) miCoche.acelera(-5, 1);
+				if(teclas[0]) MundoJuego.aplicarFuerza(miCoche.fuerzaAceleracionAdelante(), miCoche);
+				else if(teclas[1]) MundoJuego.aplicarFuerza(miCoche.fuerzaAceleracionAtras(), miCoche);
+				else MundoJuego.aplicarFuerza(0, miCoche);
 				if(teclas[2]) miCoche.gira(10);
 				if(teclas[3]) miCoche.gira(-10);
 				// Chequear choques

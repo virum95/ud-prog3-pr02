@@ -10,16 +10,21 @@ public class Coche {
 	protected double posX;  // Posición en X (horizontal)
 	protected double posY;  // Posición en Y (vertical)
 	protected String piloto;  // Nombre de piloto
-	
+	protected final static double MASA = 1; // Peso del coche en kg
+	protected final static double F_BASE_ADELANTE = 2000; // Fuerza Base del coche hacia adelante
+	protected final static double F_BASE_ATRAS = -1000; // Fuerza Base del coche hacia atras
+	protected final static double ROZAMIENTO_SUELO = 15.5; // Coeficiente de rozamiento con el suelo
+	protected final static double ROZAMIENTO_AIRE = 0.35; // Coeficiente de rozamiento con el aire
+
 	// Constructores
-	
+
 	public Coche() {
 		miVelocidad = 0;
 		miDireccionActual = 0;
 		posX = 300;
 		posY = 300;
 	}
-	
+
 	/** Devuelve la velocidad actual del coche en píxeles por segundo
 	 * @return	velocidad
 	 */
@@ -56,15 +61,15 @@ public class Coche {
 		setPosX( posX );
 		setPosY( posY );
 	}
-	
+
 	public void setPosX( double posX ) {
 		this.posX = posX; 
 	}
-	
+
 	public void setPosY( double posY ) {
 		this.posY = posY; 
 	}
-	
+
 	public String getPiloto() {
 		return piloto;
 	}
@@ -81,7 +86,7 @@ public class Coche {
 	public void acelera( double aceleracion, double tiempo ) {
 		miVelocidad = MundoJuego.calcVelocidadConAceleracion( miVelocidad, aceleracion, tiempo );
 	}
-	
+
 	/** Cambia la dirección actual del coche
 	 * @param giro	Angulo de giro a sumar o restar de la dirección actual, en grados (-180 a +180)
 	 * 				Considerando positivo giro antihorario, negativo giro horario
@@ -89,7 +94,7 @@ public class Coche {
 	public void gira( double giro ) {
 		setDireccionActual( miDireccionActual + giro );
 	}
-	
+
 	/** Cambia la posición del coche dependiendo de su velocidad y dirección
 	 * @param tiempoDeMovimiento	Tiempo transcurrido, en segundos
 	 */
@@ -97,10 +102,40 @@ public class Coche {
 		setPosX( posX + MundoJuego.calcMovtoX( miVelocidad, miDireccionActual, tiempoDeMovimiento ) );
 		setPosY( posY + MundoJuego.calcMovtoY( miVelocidad, miDireccionActual, tiempoDeMovimiento ) );
 	}
-	
+
+	/** Devuelve la fuerza de aceleración del coche, de acuerdo al motor definido en la práctica 2 
+	 * @return Fuerza de aceleración en Newtixels 
+	 */ 
+	public double fuerzaAceleracionAdelante() { 
+		if (miVelocidad<=-150) return F_BASE_ADELANTE; 
+		else if (miVelocidad<=0) 
+			return F_BASE_ADELANTE*(-miVelocidad/150*0.5+0.5); 
+		else if (miVelocidad<=250) 
+			return F_BASE_ADELANTE*(miVelocidad/250*0.5+0.5); 
+		else if (miVelocidad<=750) 
+			return F_BASE_ADELANTE; 
+		else return F_BASE_ADELANTE*(-(miVelocidad-1000)/250); 
+	} 
+
+
+	public double fuerzaAceleracionAtras(){
+		if (miVelocidad<=-500) return 0;
+		else if (miVelocidad<=-350)
+			return F_BASE_ATRAS*((miVelocidad+500)/150); 
+		else if (miVelocidad<=-200)  
+			return F_BASE_ATRAS; 
+		else if (miVelocidad<=0) 
+			return F_BASE_ATRAS*((0.7*(miVelocidad+200)/200)+1); 
+		else if (miVelocidad<=250) 
+			return F_BASE_ATRAS*(0.55*(miVelocidad-250)/-250+3); 
+		else if (miVelocidad<=1000) 
+			return F_BASE_ATRAS; 
+		else return F_BASE_ATRAS*0.85; 		
+	}
+
 	@Override
 	public String toString() {
 		return piloto + " (" + posX + "," + posY + ") - " +
-			   "Velocidad: " + miVelocidad + " ## Dirección: " + miDireccionActual; 
+				"Velocidad: " + miVelocidad + " ## Dirección: " + miDireccionActual; 
 	}
 }
