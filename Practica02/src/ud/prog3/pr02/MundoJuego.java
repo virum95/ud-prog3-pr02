@@ -1,6 +1,9 @@
 package ud.prog3.pr02;
 
+import java.util.ArrayList;
+
 import javax.swing.JPanel;
+
 
 /** "Mundo" del juego del coche.
  * Incluye las físicas para el movimiento y los choques de objetos.
@@ -11,12 +14,16 @@ import javax.swing.JPanel;
 public class MundoJuego {
 	private JPanel panel;  // panel visual del juego
 	CocheJuego miCoche;    // Coche del juego
+	private ArrayList<JLabelEstrella> estrellas;
+	public static int cogidas;
+	//	private static Logger logger = Logger.getLogger( MundoJuego.class.getName() );
 
 	/** Construye un mundo de juego
 	 * @param panel	Panel visual del juego
 	 */
 	public MundoJuego( JPanel panel ) {
 		this.panel = panel;
+		estrellas = new ArrayList<JLabelEstrella>();
 	}
 
 	/** Crea un coche nuevo y lo añade al mundo y al panel visual
@@ -135,5 +142,59 @@ public class MundoJuego {
 		} else { 
 			coche.acelera( aceleracion, 0.04 ); 
 		}
+	}
+
+	/** Si han pasado más de 1,2 segundos desde la última, 
+	 * crea una estrella nueva en una posición aleatoria y la añade al mundo y al panel visual */ 
+	long tiempo;
+	public void creaEstrella() {
+		long actual = System.currentTimeMillis();
+		if(actual - tiempo >= 1200){
+			JLabelEstrella e = new JLabelEstrella();
+			tiempo = e.getHoraDeCreaccion();
+			estrellas.add(e);
+			e.setLocation((int)((panel.getWidth()-50)*Math.random()), (int)((panel.getHeight()-50)*Math.random()));
+			panel.add(e);
+			panel.repaint();
+		}
+	}
+
+	/** Quita todas las estrellas que lleven en pantalla demasiado tiempo 
+	 * y rota 10 grados las que sigan estando 
+	 * @param maxTiempo Tiempo máximo para que se mantengan las estrellas (msegs) 
+	 * @return Número de estrellas quitadas */ 
+	public int quitaYRotaEstrellas( long maxTiempo ) {
+		int eliminadas = 0;
+		//		logger.log(Level.SEVERE, "QUita estrellas");
+		for(int i = 0; i<estrellas.size(); i++){
+			estrellas.get(i).setGiro(10);
+			if(System.currentTimeMillis()-estrellas.get(i).getHoraDeCreaccion()>maxTiempo){
+				panel.remove(estrellas.get(i));
+				estrellas.remove(i);
+				panel.repaint();
+				eliminadas++;
+			}
+		}
+		return eliminadas;
+	}
+
+	/** Calcula si hay choques del coche con alguna estrella (o varias). Se considera el choque si 
+	 * se tocan las esferas lógicas del coche y la estrella. Si es así, las elimina. 
+	 * @return Número de estrellas eliminadas 
+	 */ 
+	public int choquesConEstrellas(){
+		int eliminadas = 0;
+		for(int i = 0; i<estrellas.size(); i++){
+			if(Math.abs(JLabelCoche.TAMANYO_COCHE/2+miCoche.getPosY() - (JLabelEstrella.TAMANYO_ESTRELLA/2+estrellas.get(i).getY())) < JLabelCoche.RADIO_ESFERA_COCHE+JLabelEstrella.RADIO_ESFERA_ESTRELLA
+					&& Math.abs(JLabelCoche.TAMANYO_COCHE/2+miCoche.getPosX() - (JLabelEstrella.TAMANYO_ESTRELLA/2+estrellas.get(i).getX())) < JLabelCoche.RADIO_ESFERA_COCHE+JLabelEstrella.RADIO_ESFERA_ESTRELLA){
+				panel.remove(estrellas.get(i));
+				estrellas.remove(estrellas.get(i));
+				cogidas++;
+				VentanaJuego.lMensaje.setText("hay Choque. Cogidas: "+cogidas);
+				panel.repaint();
+				eliminadas++;
+			}
+		}
+		return eliminadas;
 	}
 }
