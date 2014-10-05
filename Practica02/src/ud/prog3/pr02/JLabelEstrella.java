@@ -18,7 +18,7 @@ public class JLabelEstrella extends JLabel{
 	private static final long serialVersionUID = 10L;  // Para serialización
 	public static final int TAMANYO_ESTRELLA = 40;  // píxels (igual ancho que algo)
 	public static final int RADIO_ESFERA_ESTRELLA = 17;  // Radio en píxels del bounding circle de la estrella (para choques)
-	private static final boolean DIBUJAR_ESFERA_ESTRELLA = true;  // Dibujado (para depuración) del bounding circle de choque del estrella
+	private static final boolean DIBUJAR_ESFERA_ESTRELLA = false;  // Dibujado (para depuración) del bounding circle de choque del estrella
 	private long horaDeCreaccion;
 	
 	/** Construye y devuelve el JLabel de la estrella con su gráfico y tamaño
@@ -52,11 +52,7 @@ public class JLabelEstrella extends JLabel{
 	 */
 	public void setGiro( double gradosGiro ) {
 		// De grados a radianes...
-		miGiro += gradosGiro/180*Math.PI;
-		// El giro en la pantalla es en sentido horario (inverso):
-		miGiro = -miGiro;  // Cambio el sentido del giro
-		// Y el gráfico del coche apunta hacia arriba (en lugar de derecha OX)
-		miGiro = miGiro + Math.PI/2; // Sumo 90º para que corresponda al origen OX
+		miGiro += Math.toRadians(gradosGiro);
 	}
 
 	// Redefinición del paintComponent para que se escale y se rote el gráfico

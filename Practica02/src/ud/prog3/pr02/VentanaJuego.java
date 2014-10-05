@@ -159,12 +159,16 @@ public class VentanaJuego extends JFrame {
 				miMundo.creaEstrella();
 				miMundo.quitaYRotaEstrellas(6000);
 				miMundo.choquesConEstrellas();
+				if(MundoJuego.perdidas >= 10)
+					acaba();
 				// Dormir el hilo 40 milisegundos
 				try {
 					Thread.sleep( 40 );
 				} catch (Exception e) {
 				}
 			}
+			JOptionPane.showMessageDialog(rootPane, "Se acabo el Juego. Puntuacion Final: "+MundoJuego.cogidas*5);
+			System.exit(0);
 		}
 		/** Ordena al hilo detenerse en cuanto sea posible
 		 */

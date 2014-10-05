@@ -16,6 +16,7 @@ public class MundoJuego {
 	CocheJuego miCoche;    // Coche del juego
 	private ArrayList<JLabelEstrella> estrellas;
 	public static int cogidas;
+	public static int perdidas = 0;
 	//	private static Logger logger = Logger.getLogger( MundoJuego.class.getName() );
 
 	/** Construye un mundo de juego
@@ -165,15 +166,16 @@ public class MundoJuego {
 	 * @return Número de estrellas quitadas */ 
 	public int quitaYRotaEstrellas( long maxTiempo ) {
 		int eliminadas = 0;
-		//		logger.log(Level.SEVERE, "QUita estrellas");
 		for(int i = 0; i<estrellas.size(); i++){
 			estrellas.get(i).setGiro(10);
 			if(System.currentTimeMillis()-estrellas.get(i).getHoraDeCreaccion()>maxTiempo){
 				panel.remove(estrellas.get(i));
 				estrellas.remove(i);
-				panel.repaint();
 				eliminadas++;
+				perdidas++;
+				VentanaJuego.lMensaje.setText("Puntuacion: "+cogidas*5+" ESTRELLA PERDIDA. TOTAL PERDIDAS = "+perdidas );
 			}
+			panel.repaint();
 		}
 		return eliminadas;
 	}
@@ -190,7 +192,7 @@ public class MundoJuego {
 				panel.remove(estrellas.get(i));
 				estrellas.remove(estrellas.get(i));
 				cogidas++;
-				VentanaJuego.lMensaje.setText("hay Choque. Cogidas: "+cogidas);
+				VentanaJuego.lMensaje.setText("Puntuacion: "+cogidas*5);
 				panel.repaint();
 				eliminadas++;
 			}
